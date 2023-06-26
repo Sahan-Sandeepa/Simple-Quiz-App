@@ -38,17 +38,43 @@ class QuizParser(xml.sax.ContentHandler):
         #return the finished quiz
         return self.new_quiz
     
-    def startElement(self, name, attrs):
-        if name == "QuizML":
+    def startElement(self, tagname, attrs):
+
+        if tagname == "QuizML":
             self._parse_state == QuizParserState.PARSE_QUIZ
             self.new_quiz.name == attrs["name"]
 
-    def endElement(self, name):
-        if name == "QuizML":
+        elif tagname == "Description":
+            self._parse_state == QuizParserState.PARSE_DESCRIPTION
+
+        elif tagname == "Question":
+            self._parse_state = QuizParserState.PARSE_QUESTION
+            if attrs["type"] == "multichoice":
+                self._current_question = QuestionMc()
+            elif attrs["type"] == "tf":
+                self._current_question == QuestionTF()
+            self._current_question.points = int(attrs["points"])
+            self.new_quiz.total_points += self._current_question.points
+
+        elif tagname == "QuestionText":
+            self._parse_state = QuizParserState.PARSE_QUEST_TEXT
+            self._current_question.correct_answer = attrs["answer"]
+
+    def endElement(self, tagname):
+
+        if tagname == "QuizML":
             self._parse_state == QuizParserState.IDLE
-        
+        elif tagname == "Description":
+            self._parse_state = QuizParserState.PARSE_QUIZ
+        elif tagname == "Question":
+            self.new_quiz.questions.append(self._current_question)
+            self._parse_state = QuizParserState.PARSE_QUIZ  
         #ToDo: process the rest of the tags
 
-    def characters(self, content):
-        pass
+    def characters(self, chars):
+
+        if self._parse_state == QuizParserState.PARSE_DESCRIPTION:
+            self.new_quiz.description += chars
+
+
     
