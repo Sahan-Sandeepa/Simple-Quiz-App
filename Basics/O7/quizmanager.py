@@ -38,16 +38,8 @@ class QuizManager:
         self.the_quiz.print_results(self.quiztaker)
 
     def save_results(self):
+        pass
 
-        today = datetime.datetime.now()
-        filename = f"QuizResult_{today.year}_{today.month}_{today.day}.txt"
-
-        n = 1
-        while(os.path.exists(filename)):
-            filename = f"QuizResult_{today.year}_{today.month}_{today.day}.txt"
-            n = n + 1
-        with open(filename, "w") as f:
-            self.the_quiz.print_results(self.quiztaker, f)
 if __name__ == "__main__":
     qm = QuizManager("Quizzes")
     qm.list_quizzes()
