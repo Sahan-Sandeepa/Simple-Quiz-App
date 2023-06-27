@@ -1,5 +1,6 @@
 import xml.sax
-from Basics.O2.quiz import Quiz
+from O2.quiz import QuestionMc, QuestionTF
+from O2.quiz import Answer, Quiz
 from quiz import *
 from enum import Enum, unique
 
@@ -16,8 +17,8 @@ class QuizParserState(Enum):
 class QuizParser(xml.sax.ContentHandler):
 
     """
-    The QuizParser class loads a paticular quiz file, parses it and return 
-    fully-built quiz object that can then be presented to the user.
+    The QuizParser class loads a particular quiz file, parses it and returns
+    a fully-built quiz object that can then be presented to the user.
 
     """
     def __init__(self):
@@ -28,31 +29,29 @@ class QuizParser(xml.sax.ContentHandler):
         self._current_answer = None
 
     def parse_quiz(self, quizpath):
-        #load the file content
-
+        # load the file content
         with open(quizpath, "r") as quizfile:
             if quizfile.mode == "r":
                 quiztext = quizfile.read()
         xml.sax.parseString(quiztext, self)
 
-        #return the finished quiz
+        # return the finished quiz
         return self.new_quiz
     
     def startElement(self, tagname, attrs):
-
         if tagname == "QuizML":
-            self._parse_state == QuizParserState.PARSE_QUIZ
-            self.new_quiz.name == attrs["name"]
+            self._parse_state = QuizParserState.PARSE_QUIZ
+            self.new_quiz.name = attrs["name"]
 
         elif tagname == "Description":
-            self._parse_state == QuizParserState.PARSE_DESCRIPTION
+            self._parse_state = QuizParserState.PARSE_DESCRIPTION
 
         elif tagname == "Question":
             self._parse_state = QuizParserState.PARSE_QUESTION
             if attrs["type"] == "multichoice":
                 self._current_question = QuestionMc()
             elif attrs["type"] == "tf":
-                self._current_question == QuestionTF()
+                self._current_question = QuestionTF()
             self._current_question.points = int(attrs["points"])
             self.new_quiz.total_points += self._current_question.points
 
@@ -66,15 +65,13 @@ class QuizParser(xml.sax.ContentHandler):
             self._parse_state = QuizParserState.PARSE_ANSWER
 
     def endElement(self, tagname):
-
         if tagname == "QuizML":
-            self._parse_state == QuizParserState.IDLE
+            self._parse_state = QuizParserState.IDLE
         elif tagname == "Description":
             self._parse_state = QuizParserState.PARSE_QUIZ
         elif tagname == "Question":
             self.new_quiz.questions.append(self._current_question)
-            self._parse_state = QuizParserState.PARSE_QUIZ  
-        #ToDo: process the rest of the tags
+            self._parse_state = QuizParserState.PARSE_QUIZ
         elif tagname == "QuestionText":
             self._parse_state = QuizParserState.PARSE_QUESTION
         elif tagname == "Answer":
@@ -82,7 +79,6 @@ class QuizParser(xml.sax.ContentHandler):
             self._parse_state = QuizParserState.PARSE_QUESTION
 
     def characters(self, chars):
-
         if self._parse_state == QuizParserState.PARSE_DESCRIPTION:
             self.new_quiz.description += chars
         elif self._parse_state == QuizParserState.PARSE_QUEST_TEXT:
@@ -97,4 +93,3 @@ if __name__ == "__main__":
     print(qz.total_points)
     for q in qz.questions:
         print(q.text)
-    

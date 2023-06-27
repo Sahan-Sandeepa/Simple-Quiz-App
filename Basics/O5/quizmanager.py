@@ -16,9 +16,9 @@ class QuizManager:
 
         if (os.path.exists(quizfolder) == False):
             raise FileNotFoundError("The Quiz Seems Not Exist!")
-        self._buid_quiz_list()
+        self._build_quiz_list()
 
-    def _buid_quiz_list(self):
+    def _build_quiz_list(self):
         dircontents = os.scandir(self.quizfolder)
         for i, f in enumerate(dircontents):
             if f.is_file():
@@ -29,9 +29,8 @@ class QuizManager:
         for k, V in self.quizzes.items():
             print(f"({k}: {V.name})")
 
-    def take_quiz(self, quizid, usename):
-
-        self.quiztaker = usename
+    def take_quiz(self, quizid, username):
+        self.quiztaker = username
         self.the_quiz = self.quizzes[quizid]
         self.results = self.the_quiz.take_quiz()
 
